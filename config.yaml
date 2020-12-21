@@ -1,0 +1,81 @@
+tags: &tags
+  - ideme
+
+droplet:
+  name: ideme
+  region: lon1
+  size: s-1vcpu-1gb
+  image:
+    slug: ubuntu-18-04-x64
+
+infrastructure:
+  vpc:
+    name: ideme
+    region: lon1
+    description: "Keeps the publically accessible ideme resources isolated."
+  domain:
+    name: ideme.tk
+  project:
+    name: ideme
+    description: "ideme Tooling"
+    purpose: "To make technical interviewing easier."
+    env: Production
+  firewall:
+    name: "idme-firewall"
+    rules:
+      inbound:
+        - protocol: tcp
+          portRange: 443
+          sources:
+            addresses:
+              - "0.0.0.0/0"
+              - "::/0"
+      outbound:
+        - protocol: tcp
+          portRange: 443
+          destinations:
+            addresses:
+              - "0.0.0.0/0"
+              - "::/0"
+    tags: *tags
+  ssh:
+    name: "ideme public key"
+
+userData: "#!/bin/sh
+
+sudo useradd -m -G users -s /bin/bash ideme
+
+sudo echo 'ideme  ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+mkdir -p /home/ideme/.ssh
+
+cat /root/.ssh/authorized_keys >> /home/ideme/.ssh/authorized_keys
+
+sudo apt-get update
+
+sudo apt install -y git docker.io apache2-utils 
+
+sudo sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+
+sudo sed -i -e '$aAllowUsers ideme' /etc/ssh/sshd_config
+
+sudo restart ssh
+
+sudo eval `ssh-agent -s`
+
+sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+
+mkdir /home/ideme/eclipse-theia
+
+cd /home/ideme/eclipse-theia
+
+curl https://raw.githubusercontent.com/ngfgrant/ideme/main/nginx-proxy-compose.yaml > nginx-proxy-compose.yaml
+
+curl https://raw.githubusercontent.com/ngfgrant/ideme/main/eclipse-theia-compose.yaml > eclipse-theia-compose.yaml
+
+docker-compose -f nginx-proxy-compose.yaml up -d
+
+docker-compose -f eclipse-theia-compose.yaml up -d
+"

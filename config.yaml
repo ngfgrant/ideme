@@ -7,6 +7,8 @@ droplet:
   size: s-1vcpu-1gb
   image:
     slug: ubuntu-18-04-x64
+  destroy:
+    minutes: 5
 
 infrastructure:
   vpc:
@@ -14,7 +16,8 @@ infrastructure:
     region: lon1
     description: "Keeps the publically accessible ideme resources isolated."
   domain:
-    name: ideme.tk
+    name: clustr.sh
+    type: "A"
   project:
     name: ideme
     description: "ideme Tooling"
@@ -43,13 +46,39 @@ infrastructure:
 
 userData: "#!/bin/sh
 
-sudo useradd -m -G users -s /bin/bash ideme
+useradd -m -G users -s /bin/bash ideme
 
-sudo echo 'ideme  ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+groupadd docker
+
+usermod -aG docker ideme
+
+echo 'ideme  ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 mkdir -p /home/ideme/.ssh
 
 cat /root/.ssh/authorized_keys >> /home/ideme/.ssh/authorized_keys
+
+su ideme
+
+sudo ufw disable
+
+sudo fallocate -l 1G /swapfile
+
+sudo chmod 600 /swapfile
+
+sudo mkswap /swapfile
+
+sudo swapon /swapfile
+
+sudo cp /etc/fstab /etc/fstab.bak
+
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+sudo apt-get purge do-agent
+
+curl -sSL https://repos.insights.digitalocean.com/install.sh -o /tmp/install.sh
+
+sudo bash /tmp/install.sh
 
 sudo apt-get update
 
@@ -63,17 +92,25 @@ sudo restart ssh
 
 sudo eval `ssh-agent -s`
 
+sudo mkdir -p /etc/nginx/htpasswd
+
+sudo touch /etc/nginx/htpasswd/FULL_THEIA_DOMAIN
+
+sudo htpasswd -b -c /etc/nginx/htpasswd/FULL_THEIA_DOMAIN RANDOM_USERNAME RANDOM_PASSWORD
+
 sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 
 sudo chmod +x /usr/local/bin/docker-compose
 
-mkdir /home/ideme/eclipse-theia
+mkdir /home/ideme/theia
 
-cd /home/ideme/eclipse-theia
+cd /home/ideme/theia
 
 curl https://raw.githubusercontent.com/ngfgrant/ideme/main/nginx-proxy-compose.yaml > nginx-proxy-compose.yaml
 
 curl https://raw.githubusercontent.com/ngfgrant/ideme/main/eclipse-theia-compose.yaml > eclipse-theia-compose.yaml
+
+sudo sed -i -e 's/UNIQUE_THEIA_DOMAIN/FULL_THEIA_DOMAIN/g' eclipse-theia-compose.yaml 
 
 docker-compose -f nginx-proxy-compose.yaml up -d
 

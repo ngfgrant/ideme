@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/digitalocean/godo"
 	"github.com/spf13/viper"
-	"os"
 )
 
 type doApi struct {
@@ -22,10 +21,7 @@ type doInfrastructure struct {
 	Tags     []string
 }
 
-func createInfrastructure() doInfrastructure {
-	token := os.Getenv("DO_TOKEN")
-	ctx := context.TODO()
-	api := doApi{ctx, token}
+func createInfrastructure(api doApi) doInfrastructure {
 
 	domainConfig := viper.GetStringMapString("infrastructure.domain")
 	vpcConfig := viper.GetStringMapString("infrastructure.vpc")
@@ -33,8 +29,6 @@ func createInfrastructure() doInfrastructure {
 	firewallConfig := viper.Get("infrastructure.firewall")
 	sshConfig := viper.GetStringMapString("infrastructure.ssh")
 	tags := viper.GetStringSlice("tags")
-
-	fmt.Printf("%s", firewallConfig)
 
 	createTags(api, tags)
 	vpc := createVpc(api, vpcConfig)

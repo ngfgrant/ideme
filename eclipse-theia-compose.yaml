@@ -5,5 +5,5 @@ services:
     image: theiaide/theia:next
     init: true
     environment:
-      - VIRTUAL_HOST='theia.ideme.tk'
-      - LETSENCRYPT_HOST='theia.ideme.tk'
+      - VIRTUAL_HOST=UNIQUE_THEIA_DOMAIN
+      - LETSENCRYPT_HOST=UNIQUE_THEIA_DOMAIN

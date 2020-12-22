@@ -24,8 +24,6 @@ func createFirewall(api doApi, firewall interface{}) *godo.Firewall {
 		fmt.Printf("bad Unmarshal %s", err)
 	}
 
-	fmt.Printf("%s\n", fw.Inbound)
-
 	client := godo.NewFromToken(api.token)
 	allAddresses := []string{"0.0.0.0/0", "::/0"}
 	firewallName := "ideme-firewall"

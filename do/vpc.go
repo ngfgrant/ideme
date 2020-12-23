@@ -1,4 +1,4 @@
-package main
+package do
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func createVpc(api doApi, vpc map[string]string) *godo.VPC {
+func createVpc(api API, vpc map[string]string) *godo.VPC {
 	client := godo.NewFromToken(api.token)
 	request := &godo.VPCCreateRequest{
 		Name:        vpc["name"],
@@ -28,7 +28,7 @@ func createVpc(api doApi, vpc map[string]string) *godo.VPC {
 	return result
 }
 
-func getVpc(api doApi, name string) *godo.VPC {
+func getVpc(api API, name string) *godo.VPC {
 	var vpcId string
 	client := godo.NewFromToken(api.token)
 	vpcs := listVpcs(api)
@@ -47,7 +47,7 @@ func getVpc(api doApi, name string) *godo.VPC {
 	return vpc
 }
 
-func listVpcs(api doApi) []*godo.VPC {
+func listVpcs(api API) []*godo.VPC {
 	client := godo.NewFromToken(api.token)
 	opts := &godo.ListOptions{
 		Page:    1,

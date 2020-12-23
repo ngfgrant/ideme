@@ -1,4 +1,4 @@
-package main
+package do
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func createSshKey(api doApi, ssh map[string]string) *godo.Key {
+func createSshKey(api API, ssh map[string]string) *godo.Key {
 	publicKey := os.Getenv("IDEME_PUB_KEY")
 	client := godo.NewFromToken(api.token)
 	request := &godo.KeyCreateRequest{
@@ -30,7 +30,7 @@ func createSshKey(api doApi, ssh map[string]string) *godo.Key {
 	return result
 }
 
-func getSshKey(api doApi, name string) *godo.Key {
+func getSshKey(api API, name string) *godo.Key {
 	var keyId int
 	client := godo.NewFromToken(api.token)
 	keys := listSshKeys(api)
@@ -52,7 +52,7 @@ func getSshKey(api doApi, name string) *godo.Key {
 	return key
 }
 
-func listSshKeys(api doApi) []godo.Key {
+func listSshKeys(api API) []godo.Key {
 	client := godo.NewFromToken(api.token)
 	opts := &godo.ListOptions{Page: 1, PerPage: 200}
 	keys, _, err := client.Keys.List(api.ctx, opts)

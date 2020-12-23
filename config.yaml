@@ -106,9 +106,9 @@ mkdir /home/ideme/theia
 
 cd /home/ideme/theia
 
-curl https://raw.githubusercontent.com/ngfgrant/ideme/main/nginx-proxy-compose.yaml > nginx-proxy-compose.yaml
+curl https://raw.githubusercontent.com/ngfgrant/ideme/main/do/nginx-proxy-compose.yaml > nginx-proxy-compose.yaml
 
-curl https://raw.githubusercontent.com/ngfgrant/ideme/main/eclipse-theia-compose.yaml > eclipse-theia-compose.yaml
+curl https://raw.githubusercontent.com/ngfgrant/ideme/main/do/eclipse-theia-compose.yaml > eclipse-theia-compose.yaml
 
 sudo sed -i -e 's/UNIQUE_THEIA_DOMAIN/FULL_THEIA_DOMAIN/g' eclipse-theia-compose.yaml 
 

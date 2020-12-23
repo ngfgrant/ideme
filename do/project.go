@@ -1,4 +1,4 @@
-package main
+package do
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func createProject(api doApi, project map[string]string) *godo.Project {
+func createProject(api API, project map[string]string) *godo.Project {
 	client := godo.NewFromToken(api.token)
 	request := &godo.CreateProjectRequest{
 		Name:        project["name"],
@@ -28,7 +28,7 @@ func createProject(api doApi, project map[string]string) *godo.Project {
 	return result
 }
 
-func getProject(api doApi, name string) *godo.Project {
+func getProject(api API, name string) *godo.Project {
 	client := godo.NewFromToken(api.token)
 	var projectId string
 	projects := listProjects(api)
@@ -49,7 +49,7 @@ func getProject(api doApi, name string) *godo.Project {
 	return project
 }
 
-func listProjects(api doApi) []godo.Project {
+func listProjects(api API) []godo.Project {
 	client := godo.NewFromToken(api.token)
 	opts := &godo.ListOptions{
 		Page:    1,
@@ -65,7 +65,7 @@ func listProjects(api doApi) []godo.Project {
 	return projects
 }
 
-func addResourcesToProject(api doApi, projectId string, resources []string) {
+func addResourcesToProject(api API, projectId string, resources []string) {
 	client := godo.NewFromToken(api.token)
 	for _, r := range resources {
 		_, _, err := client.Projects.AssignResources(api.ctx, projectId, r)
@@ -73,6 +73,5 @@ func addResourcesToProject(api doApi, projectId string, resources []string) {
 			fmt.Printf("Error adding resources to Project: %s\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Added: %s resource to Project.\n", r)
 	}
 }

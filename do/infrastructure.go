@@ -1,18 +1,11 @@
-package main
+package do
 
 import (
-	"context"
-	"fmt"
 	"github.com/digitalocean/godo"
 	"github.com/spf13/viper"
 )
 
-type doApi struct {
-	ctx   context.Context
-	token string
-}
-
-type doInfrastructure struct {
+type DOInfrastructure struct {
 	Vpc      *godo.VPC
 	Project  *godo.Project
 	Firewall *godo.Firewall
@@ -21,7 +14,7 @@ type doInfrastructure struct {
 	Tags     []string
 }
 
-func createInfrastructure(api doApi) doInfrastructure {
+func CreateInfrastructure(api API) DOInfrastructure {
 
 	domainConfig := viper.GetStringMapString("infrastructure.domain")
 	vpcConfig := viper.GetStringMapString("infrastructure.vpc")
@@ -37,7 +30,7 @@ func createInfrastructure(api doApi) doInfrastructure {
 	domain := createDomain(api, domainConfig)
 	sshKey := createSshKey(api, sshConfig)
 
-	infra := doInfrastructure{
+	infra := DOInfrastructure{
 		Vpc:      vpc,
 		Project:  project,
 		Firewall: firewall,
@@ -51,5 +44,25 @@ func createInfrastructure(api doApi) doInfrastructure {
 		domain.URN(),
 	}
 	addResourcesToProject(api, infra.Project.ID, resources)
+	return infra
+}
+
+func GetInfrastructure(api API) DOInfrastructure {
+	vpc := getVpc(api, viper.GetString("infrastructure.vpc.name"))
+	project := getProject(api, viper.GetString("infrastructure.project.name"))
+	firewall := getFirewall(api, viper.GetString("infrastructure.project.name"))
+	domain := getDomain(api, viper.GetString("infrastructure.domain.name"))
+	ssh := getSshKey(api, viper.GetString("infrastructure.ssh.name"))
+	tags := viper.GetStringSlice("tags")
+
+	infra := DOInfrastructure{
+		Vpc:      vpc,
+		Project:  project,
+		Firewall: firewall,
+		Domain:   domain,
+		SshKey:   ssh,
+		Tags:     tags,
+	}
+
 	return infra
 }

@@ -1,4 +1,4 @@
-package main
+package do
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type HttpCredentials struct {
 	PASSWORD string
 }
 
-func createDroplet(api doApi, infra doInfrastructure, domain Domain) (*godo.Droplet, string) {
+func createDroplet(api API, infra DOInfrastructure, domain Domain) (*godo.Droplet, string) {
 	client := godo.NewFromToken(api.token)
 
 	// HTTP Login Details
@@ -55,24 +55,25 @@ func createDroplet(api doApi, infra doInfrastructure, domain Domain) (*godo.Drop
 	// Add Domain Record for new Droplet
 	time.Sleep(15 * time.Second)
 
-	droplet := fetchDroplet(api, d.ID)
+	droplet := getDropletByID(api, d.ID)
 	ip, _ := droplet.PublicIPv4()
-	fmt.Printf("Login with username: %s\npassword: %s\n", httpCreds.USERNAME, httpCreds.PASSWORD)
+	fmt.Println("Application Launching. This may take a few minutes.")
+	fmt.Printf("Login: %s\nUsername: %s\nPassword: %s\n", "https://"+domain.FullUrl, httpCreds.USERNAME, httpCreds.PASSWORD)
 
 	return droplet, ip
 }
 
-func destroyDroplet(api doApi, droplet *godo.Droplet) {
+func deleteDroplet(api API, droplet *godo.Droplet) {
 	client := godo.NewFromToken(api.token)
-	fmt.Printf("Destroying droplet: %s\n\n", droplet.Name)
+	fmt.Printf("Deleting droplet: %s\n", droplet.Name)
 	_, err := client.Droplets.Delete(api.ctx, droplet.ID)
 	if err != nil {
-		fmt.Printf("There was an error deleting the droplet: %s\n\n", err)
+		fmt.Printf("There was an error deleting the droplet: %s\n", err)
 		os.Exit(1)
 	}
 }
 
-func fetchDroplet(api doApi, id int) *godo.Droplet {
+func getDropletByID(api API, id int) *godo.Droplet {
 	client := godo.NewFromToken(api.token)
 	droplet, _, err := client.Droplets.Get(api.ctx, id)
 	if err != nil {
@@ -82,11 +83,49 @@ func fetchDroplet(api doApi, id int) *godo.Droplet {
 	return droplet
 }
 
+func getDropletByName(api API, name string) *godo.Droplet {
+	client := godo.NewFromToken(api.token)
+	droplets := listDroplets(api)
+
+	var id int
+	for _, d := range droplets {
+		if d.Name == name {
+			id = d.ID
+			break
+		}
+	}
+
+	if id <= 0 {
+		fmt.Printf("Could not find droplet: %s\n", name)
+		os.Exit(1)
+	}
+
+	droplet, _, err := client.Droplets.Get(api.ctx, id)
+	if err != nil {
+		fmt.Println("Error getting droplet.")
+		os.Exit(1)
+	}
+	return droplet
+}
+
+func listDroplets(api API) []godo.Droplet {
+	client := godo.NewFromToken(api.token)
+	opts := &godo.ListOptions{
+		Page:    1,
+		PerPage: 100,
+	}
+
+	droplets, _, lerr := client.Droplets.List(api.ctx, opts)
+	if lerr != nil {
+		fmt.Println("Could not fetch droplets.")
+	}
+	return droplets
+}
+
 func parseUserData(ud string, domain Domain, creds HttpCredentials) string {
 	dom := strings.ReplaceAll(ud, "FULL_THEIA_DOMAIN", domain.FullUrl)
 	us := strings.ReplaceAll(dom, "RANDOM_USERNAME", creds.USERNAME)
 	userData := strings.ReplaceAll(us, "RANDOM_PASSWORD", creds.PASSWORD)
-	fmt.Println(userData)
 	return userData
 }
 

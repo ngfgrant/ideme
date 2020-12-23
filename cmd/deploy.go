@@ -19,10 +19,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package main
+package cmd
 
-import "ideme/cmd"
+import (
+	"github.com/spf13/cobra"
+	"ideme/do"
+)
 
-func main() {
-	cmd.Execute()
+// deployCmd represents the deploy command
+var deployCmd = &cobra.Command{
+	Use:   "deploy",
+	Short: "Deploy your infrastructure or IDE",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if args[0] == "infrastructure" {
+			api := do.ConfigureApi()
+			do.CreateInfrastructure(api)
+		}
+		if args[0] == "app" {
+			api := do.ConfigureApi()
+			infra := do.GetInfrastructure(api)
+			do.CreateApplication(api, infra)
+		}
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(deployCmd)
 }

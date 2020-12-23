@@ -1,4 +1,4 @@
-package main
+package do
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type firewallConfig struct {
 	Outbound map[string][]string
 }
 
-func createFirewall(api doApi, firewall interface{}) *godo.Firewall {
+func createFirewall(api API, firewall interface{}) *godo.Firewall {
 
 	var fw firewallConfig
 
@@ -60,7 +60,7 @@ func createFirewall(api doApi, firewall interface{}) *godo.Firewall {
 	return result
 }
 
-func getFirewall(api doApi, name string) *godo.Firewall {
+func getFirewall(api API, name string) *godo.Firewall {
 	client := godo.NewFromToken(api.token)
 	firewalls := listFirewalls(api)
 	var firewallId string
@@ -82,7 +82,7 @@ func getFirewall(api doApi, name string) *godo.Firewall {
 	return firewall
 }
 
-func listFirewalls(api doApi) []godo.Firewall {
+func listFirewalls(api API) []godo.Firewall {
 	client := godo.NewFromToken(api.token)
 	opts := &godo.ListOptions{
 		Page:    1,

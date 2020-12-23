@@ -19,10 +19,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package main
+package cmd
 
-import "ideme/cmd"
+import (
+	"github.com/spf13/cobra"
+	"ideme/do"
+)
 
-func main() {
-	cmd.Execute()
+// deleteCmd represents the delete command
+var deleteCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete an application.",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		if args[0] == "app" {
+			var name string = args[1]
+			api := do.ConfigureApi()
+			do.DeleteApplication(api, name)
+		}
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(deleteCmd)
 }

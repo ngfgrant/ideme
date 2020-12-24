@@ -1,5 +1,7 @@
 # IDEme
 
+![ideme](https://github.com/ngfgrant/ideme/workflows/ideme/badge.svg)
+
 IDEme is a quick and easy way to deploy a isolated Theia IDE instance to a
 DigitalOcean account.
 

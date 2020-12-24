@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func CreateApplication(api API, infra DOInfrastructure) {
+func CreateApplication(api API, infra DOInfrastructure, image string) {
 	sub := strings.ToLower(babble.NewBabbler().Babble()) + "-" + viper.GetString("droplet.name")
 	// Create Domain Names
 	domain := Domain{
@@ -17,7 +17,7 @@ func CreateApplication(api API, infra DOInfrastructure) {
 	}
 
 	// Create Application Droplet
-	droplet, ip := createDroplet(api, infra, domain)
+	droplet, ip := createDroplet(api, infra, domain, image)
 
 	// Add Resources to DO Project
 	addResourcesToProject(api, infra.Project.ID, []string{droplet.URN()})

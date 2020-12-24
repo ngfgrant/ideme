@@ -15,7 +15,7 @@ type HttpCredentials struct {
 	PASSWORD string
 }
 
-func createDroplet(api API, infra DOInfrastructure, domain Domain) (*godo.Droplet, string) {
+func createDroplet(api API, infra DOInfrastructure, domain Domain, image string) (*godo.Droplet, string) {
 	client := godo.NewFromToken(api.token)
 
 	// HTTP Login Details
@@ -28,7 +28,7 @@ func createDroplet(api API, infra DOInfrastructure, domain Domain) (*godo.Drople
 	}
 
 	// Configure Droplet User Data
-	userData := parseUserData(viper.GetString("userData"), domain, httpCreds)
+	userData := parseUserData(viper.GetString("userData"), domain, httpCreds, image)
 
 	// Create Droplet
 	createRequest := &godo.DropletCreateRequest{
@@ -122,10 +122,11 @@ func listDroplets(api API) []godo.Droplet {
 	return droplets
 }
 
-func parseUserData(ud string, domain Domain, creds HttpCredentials) string {
-	dom := strings.ReplaceAll(ud, "FULL_THEIA_DOMAIN", domain.FullUrl)
+func parseUserData(ud string, domain Domain, creds HttpCredentials, image string) string {
+	dom := strings.ReplaceAll(ud, "FULL_APP_DOMAIN", domain.FullUrl)
 	us := strings.ReplaceAll(dom, "RANDOM_USERNAME", creds.USERNAME)
-	userData := strings.ReplaceAll(us, "RANDOM_PASSWORD", creds.PASSWORD)
+	i := strings.ReplaceAll(us, "APPLICATION_DOCKER_IMAGE", image)
+	userData := strings.ReplaceAll(i, "RANDOM_PASSWORD", creds.PASSWORD)
 	return userData
 }
 

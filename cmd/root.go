@@ -77,7 +77,7 @@ func initConfig() {
 		}
 		// Search config in home directory with name ".ideme" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName("config.yaml")
+		viper.SetConfigName("config")
 		viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")
 	}

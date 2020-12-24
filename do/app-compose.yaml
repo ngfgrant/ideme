@@ -1,0 +1,9 @@
+version: "2.2"
+services:
+  app:
+    restart: always
+    image: APPLICATION_IMAGE
+    init: true
+    environment:
+      - VIRTUAL_HOST=UNIQUE_APP_DOMAIN
+      - LETSENCRYPT_HOST=UNIQUE_APP_DOMAIN

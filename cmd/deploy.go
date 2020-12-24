@@ -23,27 +23,48 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"ideme/do"
+	"strings"
 )
+
+var Image string
 
 // deployCmd represents the deploy command
 var deployCmd = &cobra.Command{
 	Use:   "deploy",
-	Short: "Deploy your infrastructure or IDE",
-	Args:  cobra.ExactArgs(1),
+	Short: "Deploy your infrastructure or application.",
+}
+
+var deployInfrastructureCmd = &cobra.Command{
+	Use:   "infrastructure",
+	Short: "Deploy your Infrastructure",
 	Run: func(cmd *cobra.Command, args []string) {
-		if args[0] == "infrastructure" {
-			api := do.ConfigureApi()
-			do.CreateInfrastructure(api)
+		api := do.ConfigureApi()
+		do.CreateInfrastructure(api)
+	},
+}
+
+var deployAppCmd = &cobra.Command{
+	Use:   "app",
+	Short: "Deploy your application",
+	Run: func(cmd *cobra.Command, args []string) {
+		api := do.ConfigureApi()
+		infra := do.GetInfrastructure(api)
+		var appImage string = Image
+
+		if Image == "" {
+			appImage = viper.GetString("application.image")
 		}
-		if args[0] == "app" {
-			api := do.ConfigureApi()
-			infra := do.GetInfrastructure(api)
-			do.CreateApplication(api, infra)
-		}
+
+		image := strings.ReplaceAll(appImage, "/", "\\/")
+		do.CreateApplication(api, infra, image)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(deployCmd)
+	deployCmd.AddCommand(deployInfrastructureCmd)
+	deployCmd.AddCommand(deployAppCmd)
+	deployAppCmd.Flags().StringVarP(&Image, "image", "i", "", "Docker image to use.")
 }
